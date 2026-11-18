@@ -112,7 +112,7 @@ $('download').onclick=()=>{if(!frames.length)return;srt=frames.map((f,idx)=>(idx
 $('downloadSami').onclick=()=>{
  if(!frames.length)return;
  const cues=frames.map(f=>{
-  const html=(f.srtText||f.text).replace(/<font face="Consolas" size="[0-9]+"(?: color="(#[0-9a-fA-F]{6})")?>(.*?)<\\/font>/g,(whole,color,content)=>color?'<font color="'+color+'">'+content+'</font>':content);
+  const html=(f.srtText||f.text).replace(/<font face="Consolas" size="[0-9]+"(?: color="(#[0-9a-fA-F]{6})")?>(.*?)<\/font>/g,(whole,color,content)=>color?'<font color="'+color+'">'+content+'</font>':content);
   return '<SYNC Start='+Math.round(f.start*1000)+'><P Class=ENCC>'+html+'</P>\n<SYNC Start='+Math.round(f.end*1000)+'><P Class=ENCC>&nbsp;</P>';
  }).join('\n');
  const sami='<!DOCTYPE html><SAMI>\n<HEAD><STYLE TYPE="text/css">\n<!--\nP { font-family: Arial; }\n.ENCC { Name: English; lang: en-US; }\n-->\n</STYLE></HEAD>\n<BODY>\n'+cues+'\n</BODY></SAMI>';
