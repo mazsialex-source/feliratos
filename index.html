@@ -111,12 +111,11 @@ $('generate').onclick=async()=>{if(!v.duration)return;let fps=Number($('fps').va
 $('download').onclick=()=>{if(!frames.length)return;srt=frames.map((f,idx)=>(idx+1)+'\n'+stamp(f.start)+' --> '+stamp(f.end)+'\n'+(f.srtText||f.text)).join('\n\n')+'\n';let a=document.createElement('a'),u=URL.createObjectURL(new Blob([srt],{type:'text/plain;charset=utf-8'}));a.href=u;a.download='feliratos-animation.srt';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('downloadSami').onclick=()=>{
  if(!frames.length)return;
- const escapeForSami=value=>value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
  const cues=frames.map(f=>{
-  const html=(f.srtText||f.text).replace(/<font face="Consolas" size="\\d+"(?: color="(#[0-9a-fA-F]{6})")?>([\\s\\S]*?)<\\/font>/g,(whole,color,content)=>color?'<font color="'+color+'">'+content+'</font>':content);
-  return '<SYNC Start='+Math.round(f.start*1000)+'><P Class=ENCC>'+html+'</P>\\n<SYNC Start='+Math.round(f.end*1000)+'><P Class=ENCC>&nbsp;</P>';
- }).join('\\n');
- const sami='<!DOCTYPE html><SAMI>\\n<HEAD><STYLE TYPE="text/css">\\n<!--\\nP { font-family: Arial; }\\n.ENCC { Name: English; lang: en-US; }\\n-->\\n</STYLE></HEAD>\\n<BODY>\\n'+cues+'\\n</BODY></SAMI>';
+  const html=(f.srtText||f.text).replace(/<font face="Consolas" size="[0-9]+"(?: color="(#[0-9a-fA-F]{6})")?>(.*?)<\\/font>/g,(whole,color,content)=>color?'<font color="'+color+'">'+content+'</font>':content);
+  return '<SYNC Start='+Math.round(f.start*1000)+'><P Class=ENCC>'+html+'</P>\n<SYNC Start='+Math.round(f.end*1000)+'><P Class=ENCC>&nbsp;</P>';
+ }).join('\n');
+ const sami='<!DOCTYPE html><SAMI>\n<HEAD><STYLE TYPE="text/css">\n<!--\nP { font-family: Arial; }\n.ENCC { Name: English; lang: en-US; }\n-->\n</STYLE></HEAD>\n<BODY>\n'+cues+'\n</BODY></SAMI>';
  const a=document.createElement('a'),u=URL.createObjectURL(new Blob([sami],{type:'text/plain;charset=utf-8'}));
  a.href=u;a.download='feliratos-youtube-szines.smi';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);
 };
