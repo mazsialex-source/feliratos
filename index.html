@@ -60,28 +60,23 @@ function render(){
   }
  }
  const output=out.join('\n');
- currentSrtText=output;
- if($('color').checked){
+ const rows=out.length,cols=Math.max(1,...out.map(line=>Array.from(line).length));
+ const vlcFontSize=Math.max(4,Math.min(120,Math.floor(Math.min(v.videoWidth/(cols*.62),v.videoHeight/(rows*1.15))*.78)));
+ currentSrtText=out.map((line,y)=>Array.from(line).map((ch,x)=>{
+  let rgb=[255,255,255];
   if(mode==='braille'){
-   currentSrtText=out.map((line,by)=>Array.from(line).map((ch,bx)=>{
-    const sum=[0,0,0];let samples=0;
-    for(let dy=0;dy<4;dy++)for(let dx=0;dx<2;dx++){
-     const px=bx*2+dx,py=by*4+dy;
-     if(px<w&&py<h){const rgb=RGB[py][px];sum[0]+=rgb[0];sum[1]+=rgb[1];sum[2]+=rgb[2];samples++;}
-    }
-    const hex=sum.map(channel=>Math.round(channel/Math.max(1,samples)).toString(16).padStart(2,'0')).join('');
-    const safe=ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return '<font color="#'+hex+'">'+safe+'</font>';
-   }).join('')).join('\n');
-  }else{
-   currentSrtText=out.map((line,y)=>Array.from(line).map((ch,x)=>{
-    const rgb=RGB[y][x]||[255,255,255];
-    const hex=rgb.map(channel=>Math.round(channel).toString(16).padStart(2,'0')).join('');
-    const safe=ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return '<font color="#'+hex+'">'+safe+'</font>';
-   }).join('')).join('\n');
-  }
- }
+   const sum=[0,0,0];let samples=0;
+   for(let dy=0;dy<4;dy++)for(let dx=0;dx<2;dx++){
+    const px=x*2+dx,py=y*4+dy;
+    if(px<w&&py<h){const sample=RGB[py][px];sum[0]+=sample[0];sum[1]+=sample[1];sum[2]+=sample[2];samples++;}
+   }
+   rgb=sum.map(channel=>Math.round(channel/Math.max(1,samples)));
+  }else if(RGB[y]&&RGB[y][x]){rgb=RGB[y][x];}
+  const hex=rgb.map(channel=>Math.round(channel).toString(16).padStart(2,'0')).join('');
+  const safe=ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const colorAttribute=$('color').checked?' color="#'+hex+'"':'';
+  return '<font face="Consolas" size="'+vlcFontSize+'"'+colorAttribute+'>'+safe+'</font>';
+ }).join('')).join('\n');
  art.replaceChildren();
  if($('color').checked&&mode!=='braille'){
   out.forEach((line,y)=>{
@@ -97,7 +92,7 @@ function render(){
  }else{
   art.textContent=output;
  }
- const rows=out.length,cols=Math.max(1,...out.map(line=>Array.from(line).length));const screen=$('artScreen');const fontSize=Math.max(3,Math.min(12,(screen.clientWidth-12)/(cols*.62),(screen.clientHeight-12)/(rows*1.05)));art.style.fontSize=fontSize+'px';art.style.lineHeight='1.05';if(ccOn)cc.textContent=output;
+ const screen=$('artScreen');const fontSize=Math.max(3,Math.min(12,(screen.clientWidth-12)/(cols*.62),(screen.clientHeight-12)/(rows*1.05)));art.style.fontSize=fontSize+'px';art.style.lineHeight='1.05';if(ccOn)cc.textContent=output;
  return output;
 }
 $('preview').onclick=()=>{let t=render();if(t)$('status').textContent='Előnézet frissítve.'};$('ccBtn').onclick=()=>{ccOn=!ccOn;cc.hidden=!ccOn;if(ccOn){cc.textContent=art.textContent;$('ccBtn').textContent='CC szimuláció kikapcsolása'}else $('ccBtn').textContent='CC szimuláció'};
