@@ -12,8 +12,72 @@ drop.onclick=()=>file.click();file.onchange=()=>load(file.files[0]);['dragover',
 v.onloadedmetadata=()=>{$('duration').textContent=time(v.duration);$('size').textContent=v.videoWidth+'×'+v.videoHeight;$('seek').max=1000};v.ontimeupdate=()=>{$('seek').value=v.duration?v.currentTime/v.duration*1000:0;$('time').textContent=time(v.currentTime)};$('seek').oninput=()=>{if(v.duration)v.currentTime=v.duration*$('seek').value/1000};
 ['bright','contrast','gamma','threshold'].forEach(id=>$(id).oninput=()=>$(id+'Val').textContent=$(id).value+(id==='contrast'?'%':''));
 $('yt').onchange=()=>{if($('yt').checked){$('fps').value='2';$('res').value='20,10'}};
-function render(){if(!v.videoWidth)return;let [w,h]=$('res').value.split(',').map(Number);canvas.width=v.videoWidth;canvas.height=v.videoHeight;ctx.drawImage(v,0,0,canvas.width,canvas.height);let d=ctx.getImageData(0,0,canvas.width,canvas.height).data,L=Array.from({length:h},()=>Array(w).fill(0)),RGB=Array.from({length:h},()=>Array(w));for(let y=0;y<h;y++)for(let x=0;x<w;x++){let sx=Math.min(canvas.width-1,Math.floor((x+.5)*canvas.width/w)),sy=Math.min(canvas.height-1,Math.floor((y+.5)*canvas.height/h)),p=(sy*canvas.width+sx)*4,r=d[p],g=d[p+1],b=d[p+2];RGB[y][x]=[r,g,b];let z=(.2126*r+.7152*g+.0722*b-128)*Number($('contrast').value)/100+128+Number($('bright').value)*1.5;z=255*Math.pow(Math.max(0,Math.min(255,z))/255,1/Number($('gamma').value));if($('invert').checked)z=255-z;L[y][x]=z}
-let mode=$('mode').value,chars={ascii:' .:-=+*#%@',unicode:' ░▒▓█',binary:'01',custom:$('custom').value||' .:-=+*#%@'},out=[],colorHTML=[];if(mode==='braille'){let map=[[0,0,0],[1,0,1],[2,0,2],[0,1,3],[1,1,4],[2,1,5],[0,2,6],[1,2,7]];for(let by=0;by<Math.ceil(h/4);by++){let line='';for(let bx=0;bx<Math.ceil(w/2);bx++){let bits=0;map.forEach(([dx,dy,bit])=>{let x=bx*2+dx,y=by*4+dy;if(x<w&&y<h&&L[y][x]>=Number($('threshold').value))bits|=1<<bit});line+=String.fromCharCode(0x2800+bits)}out.push(line)}}else{let set=chars[mode]||chars.ascii;for(let y=0;y<h;y++){let line='';for(let x=0;x<w;x++){let z=L[y][x];if(mode==='binary')z=z>=Number($('threshold').value)?255:0;let ch=set[Math.round(z/255*(set.length-1))];line+=ch;if($('color').checked){let [r,g,b]=RGB[y][x];colorHTML.push('<span style="color:rgb('+r+','+g+','+b+')">'+ch.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>')}}out.push(line)}}let text=out.join('\n');art.textContent=text;if($('color').checked&&mode!=='braille'){let i=0;art.innerHTML=out.map(line=>Array.from(line).map(ch=>colorHTML[i++]||ch).join('')).join('\n')}if(ccOn)cc.textContent=text;return text}
+function render(){
+ if(!v.videoWidth)return '';
+ const [w,h]=$('res').value.split(',').map(Number);
+ canvas.width=v.videoWidth;canvas.height=v.videoHeight;
+ ctx.drawImage(v,0,0,canvas.width,canvas.height);
+ const d=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+ const L=Array.from({length:h},()=>Array(w).fill(0));
+ const RGB=Array.from({length:h},()=>Array(w));
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+  const sx=Math.min(canvas.width-1,Math.floor((x+.5)*canvas.width/w));
+  const sy=Math.min(canvas.height-1,Math.floor((y+.5)*canvas.height/h));
+  const p=(sy*canvas.width+sx)*4,r=d[p],g=d[p+1],b=d[p+2];
+  RGB[y][x]=[r,g,b];
+  let z=(.2126*r+.7152*g+.0722*b-128)*Number($('contrast').value)/100+128+Number($('bright').value)*1.5;
+  z=255*Math.pow(Math.max(0,Math.min(255,z))/255,1/Number($('gamma').value));
+  if($('invert').checked)z=255-z;
+  L[y][x]=z;
+ }
+ const mode=$('mode').value;
+ const chars={ascii:' .:-=+*#%@',unicode:' ░▒▓█',binary:'01',custom:$('custom').value||' .:-=+*#%@'};
+ const out=[];
+ if(mode==='braille'){
+  const map=[[0,0,0],[0,1,1],[0,2,2],[1,0,3],[1,1,4],[1,2,5],[0,3,6],[1,3,7]];
+  for(let by=0;by<Math.ceil(h/4);by++){
+   let line='';
+   for(let bx=0;bx<Math.ceil(w/2);bx++){
+    let bits=0;
+    map.forEach(([dx,dy,bit])=>{
+     const x=bx*2+dx,y=by*4+dy;
+     if(x<w&&y<h&&L[y][x]>=Number($('threshold').value))bits|=1<<bit;
+    });
+    line+=String.fromCharCode(0x2800+bits);
+   }
+   out.push(line);
+  }
+ }else{
+  const set=Array.from(chars[mode]||chars.ascii);
+  for(let y=0;y<h;y++){
+   let line='';
+   for(let x=0;x<w;x++){
+    let z=L[y][x];
+    if(mode==='binary')z=z>=Number($('threshold').value)?255:0;
+    line+=set[Math.round(z/255*(set.length-1))]||' ';
+   }
+   out.push(line);
+  }
+ }
+ const output=out.join('\\n');
+ art.replaceChildren();
+ if($('color').checked&&mode!=='braille'){
+  out.forEach((line,y)=>{
+   Array.from(line).forEach((ch,x)=>{
+    const span=document.createElement('span');
+    const [r,g,b]=RGB[y][x];
+    span.style.color='rgb('+r+','+g+','+b+')';
+    span.textContent=ch;
+    art.appendChild(span);
+   });
+   if(y<out.length-1)art.appendChild(document.createTextNode('\\n'));
+  });
+ }else{
+  art.textContent=output;
+ }
+ if(ccOn)cc.textContent=output;
+ return output;
+}
 $('preview').onclick=()=>{let t=render();if(t)$('status').textContent='Előnézet frissítve.'};$('ccBtn').onclick=()=>{ccOn=!ccOn;cc.hidden=!ccOn;if(ccOn){cc.textContent=art.textContent;$('ccBtn').textContent='CC szimuláció kikapcsolása'}else $('ccBtn').textContent='CC szimuláció'};
 function seek(t){return new Promise(resolve=>{let done=()=>{v.removeEventListener('seeked',done);resolve()};v.addEventListener('seeked',done);v.currentTime=t;if(Math.abs(v.currentTime-t)<.001)setTimeout(done,40)})}
 $('generate').onclick=async()=>{if(!v.duration)return;let fps=Number($('fps').value),start=Math.max(0,Number($('start').value)||0),end=$('end').value===''?v.duration:Math.min(v.duration,Number($('end').value)),step=1/fps;if(end<=start){$('status').textContent='A végidőnek nagyobbnak kell lennie a kezdésnél.';return}let count=Math.ceil((end-start)*fps);if(count>3000&&!confirm(count+' képkocka készül. Folytatod?'))return;frames=[];v.pause();$('generate').disabled=true;try{for(let i=0;i<count;i++){let t=start+i*step;await seek(Math.min(t,v.duration-.01));let text=render();frames.push({start:t,end:Math.min(end,t+step),text});$('bar').style.width=Math.round((i+1)/count*100)+'%';$('frameCount').textContent=(i+1)+' képkocka';$('status').textContent='Feldolgozás: '+(i+1)+' / '+count; if(i%2===0)await new Promise(r=>setTimeout(r,0))}srt=frames.map((f,i)=>(i+1)+'\n'+stamp(f.start)+' --> '+stamp(f.end)+'\n'+f.text).join('\n\n')+'\n';$('download').disabled=false;$('downloadTxt').disabled=false;$('status').textContent='Kész! '+frames.length+' képkocka elkészült. Az SRT és TXT fájl is letölthető.'}catch(e){$('status').textContent='Hiba: '+e.message}finally{$('generate').disabled=false}};
