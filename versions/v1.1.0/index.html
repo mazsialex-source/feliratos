@@ -61,13 +61,26 @@ function render(){
  }
  const output=out.join('\n');
  currentSrtText=output;
- if($('color').checked&&mode!=='braille'){
-  currentSrtText=out.map((line,y)=>Array.from(line).map((ch,x)=>{
-   const rgb=RGB[y][x]||[255,255,255];
-   const hex=rgb.map(channel=>Math.round(channel).toString(16).padStart(2,'0')).join('');
-   const safe=ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-   return '<font color="#'+hex+'">'+safe+'</font>';
-  }).join('')).join('\n');
+ if($('color').checked){
+  if(mode==='braille'){
+   currentSrtText=out.map((line,by)=>Array.from(line).map((ch,bx)=>{
+    const sum=[0,0,0];let samples=0;
+    for(let dy=0;dy<4;dy++)for(let dx=0;dx<2;dx++){
+     const px=bx*2+dx,py=by*4+dy;
+     if(px<w&&py<h){const rgb=RGB[py][px];sum[0]+=rgb[0];sum[1]+=rgb[1];sum[2]+=rgb[2];samples++;}
+    }
+    const hex=sum.map(channel=>Math.round(channel/Math.max(1,samples)).toString(16).padStart(2,'0')).join('');
+    const safe=ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<font color="#'+hex+'">'+safe+'</font>';
+   }).join('')).join('\n');
+  }else{
+   currentSrtText=out.map((line,y)=>Array.from(line).map((ch,x)=>{
+    const rgb=RGB[y][x]||[255,255,255];
+    const hex=rgb.map(channel=>Math.round(channel).toString(16).padStart(2,'0')).join('');
+    const safe=ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<font color="#'+hex+'">'+safe+'</font>';
+   }).join('')).join('\n');
+  }
  }
  art.replaceChildren();
  if($('color').checked&&mode!=='braille'){
