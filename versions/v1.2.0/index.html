@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b14"><title>Feliratos — Video to Subtitle Animator</title>
+<style>
+:root{color-scheme:dark;--bg:#090b14;--panel:#121727;--line:#29334c;--muted:#9aa6c2;--text:#f4f6ff;--p:#a855f7;--b:#38bdf8}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0,#33205a66,transparent 35%),radial-gradient(ellipse at 90% 0,#123e5b55,transparent 30%),var(--bg);color:var(--text);font:14px system-ui,sans-serif}header{padding:18px 4vw;border-bottom:1px solid #ffffff14;font-weight:800;letter-spacing:.2px}header span{color:#c084fc}main{max-width:1300px;margin:auto;padding:30px 20px}.hero{margin-bottom:22px}.hero small{color:#c084fc;letter-spacing:2px}.hero h1{font-size:clamp(26px,4vw,42px);margin:8px 0}.hero p,.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:1.5fr .8fr;gap:18px}.panel{background:#121727eF;border:1px solid var(--line);border-radius:17px;overflow:hidden}.head{padding:16px 19px;border-bottom:1px solid #ffffff12;font-weight:750}.upload{margin:18px;border:1px dashed #7163a5;border-radius:13px;padding:30px;text-align:center;cursor:pointer;background:#a855f70b}.upload input{display:none}.previews{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 18px 18px}.screen{aspect-ratio:16/9;background:#05070d;border:1px solid #29334c;border-radius:10px;display:grid;place-items:center;overflow:hidden;position:relative}.screen video{width:100%;height:100%;object-fit:contain}.screen pre{font:7px/1.05 monospace;white-space:pre;max-width:100%;max-height:100%;width:100%;height:100%;margin:0;overflow:auto;display:block}.cc{position:absolute;bottom:6%;background:#000c;color:white;padding:7px;white-space:pre;font:10px monospace;max-width:94%;overflow:hidden}.controls,.settings{padding:16px 18px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.btn{border:1px solid #ffffff20;background:#ffffff0b;color:white;padding:9px 13px;border-radius:9px;cursor:pointer}.btn.primary{background:linear-gradient(110deg,#9333ea,#2563eb);border:0}.btn:disabled{opacity:.4;cursor:not-allowed}label{display:block;color:#c5cce0;font-size:12px;margin:12px 0 5px}select,input[type=number],input[type=text]{width:100%;background:#090e1b;color:white;border:1px solid #303b58;border-radius:8px;padding:9px}input[type=range]{width:100%;accent-color:#a855f7}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.progress{height:7px;background:#29334c;border-radius:10px;overflow:hidden;margin-top:10px}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--p),var(--b))}.foot{margin-top:18px;padding:16px;color:#aeb8d0;font-size:12px}.stats{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:12px 0}.stats b{color:white}@media(max-width:850px){.grid{grid-template-columns:1fr}}@media(max-width:540px){.previews{grid-template-columns:1fr}}
+</style></head><body><header>◈ <span>FELIRATOS</span> / Video to YouTube Subtitle Animator</header><main><div class="hero"><small>BROWSER-BASED VIDEO TOOL</small><h1>Videóból karakteres animáció.</h1><p>A videó feldolgozása helyben, a böngésződben történik. Nincs feltöltés, nincs backend.</p></div><div class="grid"><section class="panel"><div class="head">01 / Videó és előnézet</div><label class="upload" id="drop">⬆<br><b>Húzd ide a videót vagy kattints a kiválasztáshoz</b><br><span class="muted">MP4, WebM, MOV (böngészőfüggő)</span><input id="file" type="file" accept="video/*"></label><div class="stats"><span>Hossz: <b id="duration">—</b></span><span>Felbontás: <b id="size">—</b></span><span>Fájl: <b id="fileSize">—</b></span></div><div class="previews"><div><label>EREDETI VIDEÓ</label><div class="screen"><video id="video" controls playsinline></video></div></div><div><label>KARAKTERES ELŐNÉZET</label><div class="screen" id="artScreen"><pre id="art"></pre><div id="cc" class="cc" hidden></div></div></div></div><div class="controls"><div class="row"><button class="btn" id="preview">Frissítés / előnézet</button><button class="btn" id="ccBtn">CC szimuláció</button><button class="btn primary" id="generate">SRT generálása</button></div><input id="seek" type="range" min="0" max="1000" value="0"><div class="row muted"><span id="time">00:00</span><span id="frameCount">0 képkocka</span></div><div class="progress"><div class="bar" id="bar"></div></div><p class="muted" id="status">Tölts fel egy videót a kezdéshez.</p></div></section><aside class="panel"><div class="head">02 / Beállítások</div><div class="settings"><label>Karakter mód</label><select id="mode"><option value="ascii">ASCII</option><option value="unicode">Unicode árnyalás</option><option value="braille">Braille (2×4 pont)</option><option value="binary">Binary</option><option value="custom">Saját karakterek</option></select><label>Saját karakterkészlet</label><input id="custom" value=" .:-=+*#%@" type="text"><div class="two"><div><label>FPS</label><select id="fps"><option>1</option><option>2</option><option selected>5</option><option>10</option><option>15</option><option>24</option><option>30</option></select></div><div><label>Felbontás</label><select id="res"><option value="10,5">10×5</option><option value="20,10">20×10</option><option value="30,15" selected>30×15</option><option value="40,20">40×20</option><option value="60,30">60×30</option><option value="80,40">80×40</option></select></div></div><div class="two"><div><label>Kezdés (mp)</label><input id="start" type="number" min="0" value="0" step=".1"></div><div><label>Vége (mp)</label><input id="end" type="number" min="0" placeholder="videó vége" step=".1"></div></div><label>Fényerő <output id="brightVal">0</output></label><input id="bright" type="range" min="-100" max="100" value="0"><label>Kontraszt <output id="contrastVal">100%</output></label><input id="contrast" type="range" min="0" max="200" value="100"><label>Gamma <output id="gammaVal">1.0</output></label><input id="gamma" type="range" min=".3" max="2.5" step=".1" value="1"><label>Threshold <output id="thresholdVal">128</output></label><input id="threshold" type="range" min="0" max="255" value="128"><label><input id="invert" type="checkbox"> Színek invertálása</label><label><input id="edges" type="checkbox"> Éldetektálás</label><label><input id="color" type="checkbox" checked> Eredeti RGB-színek az előnézetben és az SRT-ben</label><label><input id="yt" type="checkbox"> YouTube előbeállítás (2 FPS, 20×10)</label><button class="btn primary" id="download" disabled style="width:100%;margin-top:16px">↓ SRT letöltése</button><button class="btn" id="downloadTxt" disabled style="width:100%;margin-top:8px">↓ TXT letöltése (bármilyen karakterkészlet)</button><p class="muted">Az SRT feliratok színe és pontos pozíciója YouTube-on nem garantálható.</p></div></aside></div><section class="panel foot"><b>Fontos:</b> A CC-előnézet csak szimuláció. A YouTube megjelenítése, betűtípusa, sortörése és színtámogatása eltérhet. A Braille mód valódi 2×4 pontos Braille-cellákat használ. Nagy videóknál válassz alacsonyabb FPS-t és felbontást.</section></main>
+<script>
+(()=>{const $=id=>document.getElementById(id),v=$('video'),file=$('file'),drop=$('drop'),art=$('art'),cc=$('cc'),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});let frames=[],srt='',url=null,ccOn=false,currentSrtText='';
+window.addEventListener('error',e=>{$('status').textContent='JavaScript hiba: '+e.message+' ('+e.lineno+':'+e.colno+')'});const time=t=>{t=Math.max(0,t||0);return String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0')};
+const stamp=t=>{let n=Math.max(0,Math.round(t*1000));const h=Math.floor(n/3600000);n%=3600000;const m=Math.floor(n/60000);n%=60000;const sec=Math.floor(n/1000);const ms=n%1000;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')+','+String(ms).padStart(3,'0')};
+function load(f){if(!f||!f.type.startsWith('video/'))return;if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(f);v.src=url;frames=[];$('fileSize').textContent=(f.size/1048576).toFixed(1)+' MB';$('status').textContent='Videó betöltve.'}
+drop.onclick=()=>file.click();file.onchange=()=>load(file.files[0]);['dragover','dragenter'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.style.borderColor='#c084fc'}));['dragleave','drop'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.style.borderColor=''}));drop.addEventListener('drop',e=>load(e.dataTransfer.files[0]));
+v.onloadedmetadata=()=>{$('duration').textContent=time(v.duration);$('size').textContent=v.videoWidth+'×'+v.videoHeight;$('seek').max=1000};v.ontimeupdate=()=>{$('seek').value=v.duration?v.currentTime/v.duration*1000:0;$('time').textContent=time(v.currentTime)};$('seek').oninput=()=>{if(v.duration)v.currentTime=v.duration*$('seek').value/1000};
+['bright','contrast','gamma','threshold'].forEach(id=>$(id).oninput=()=>$(id+'Val').textContent=$(id).value+(id==='contrast'?'%':''));
+$('yt').onchange=()=>{if($('yt').checked){$('fps').value='2';$('res').value='20,10'}};
+function render(){
+ if(!v.videoWidth)return '';
+ const [w,h]=$('res').value.split(',').map(Number);
+ canvas.width=v.videoWidth;canvas.height=v.videoHeight;
+ ctx.drawImage(v,0,0,canvas.width,canvas.height);
+ const d=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+ const L=Array.from({length:h},()=>Array(w).fill(0));
+ const RGB=Array.from({length:h},()=>Array(w));
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+  const sx=Math.min(canvas.width-1,Math.floor((x+.5)*canvas.width/w));
+  const sy=Math.min(canvas.height-1,Math.floor((y+.5)*canvas.height/h));
+  const p=(sy*canvas.width+sx)*4,r=d[p],g=d[p+1],b=d[p+2];
+  RGB[y][x]=[r,g,b];
+  let z=(.2126*r+.7152*g+.0722*b-128)*Number($('contrast').value)/100+128+Number($('bright').value)*1.5;
+  z=255*Math.pow(Math.max(0,Math.min(255,z))/255,1/Number($('gamma').value));
+  if($('invert').checked)z=255-z;
+  L[y][x]=z;
+ }
+ const mode=$('mode').value;
+ const chars={ascii:' .:-=+*#%@',unicode:' ░▒▓█',binary:'01',custom:$('custom').value||' .:-=+*#%@'};
+ const out=[];
+ if(mode==='braille'){
+  const map=[[0,0,0],[0,1,1],[0,2,2],[1,0,3],[1,1,4],[1,2,5],[0,3,6],[1,3,7]];
+  for(let by=0;by<Math.ceil(h/4);by++){
+   let line='';
+   for(let bx=0;bx<Math.ceil(w/2);bx++){
+    let bits=0;
+    map.forEach(([dx,dy,bit])=>{
+     const x=bx*2+dx,y=by*4+dy;
+     if(x<w&&y<h&&L[y][x]>=Number($('threshold').value))bits|=1<<bit;
+    });
+    line+=String.fromCharCode(0x2800+bits);
+   }
+   out.push(line);
+  }
+ }else{
+  const set=Array.from(chars[mode]||chars.ascii);
+  for(let y=0;y<h;y++){
+   let line='';
+   for(let x=0;x<w;x++){
+    let z=L[y][x];
+    if(mode==='binary')z=z>=Number($('threshold').value)?255:0;
+    line+=set[Math.round(z/255*(set.length-1))]||' ';
+   }
+   out.push(line);
+  }
+ }
+ const output=out.join('\n');
+ const rows=out.length,cols=Math.max(1,...out.map(line=>Array.from(line).length));
+ const vlcFontSize=Math.max(4,Math.min(120,Math.floor(Math.min(v.videoWidth/(cols*.62),v.videoHeight/(rows*1.15))*.78)));
+ currentSrtText=out.map((line,y)=>Array.from(line).map((ch,x)=>{
+  let rgb=[255,255,255];
+  if(mode==='braille'){
+   const sum=[0,0,0];let samples=0;
+   for(let dy=0;dy<4;dy++)for(let dx=0;dx<2;dx++){
+    const px=x*2+dx,py=y*4+dy;
+    if(px<w&&py<h){const sample=RGB[py][px];sum[0]+=sample[0];sum[1]+=sample[1];sum[2]+=sample[2];samples++;}
+   }
+   rgb=sum.map(channel=>Math.round(channel/Math.max(1,samples)));
+  }else if(RGB[y]&&RGB[y][x]){rgb=RGB[y][x];}
+  const hex=rgb.map(channel=>Math.round(channel).toString(16).padStart(2,'0')).join('');
+  const safe=ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const colorAttribute=$('color').checked?' color="#'+hex+'"':'';
+  return '<font face="Consolas" size="'+vlcFontSize+'"'+colorAttribute+'>'+safe+'</font>';
+ }).join('')).join('\n');
+ art.replaceChildren();
+ if($('color').checked&&mode!=='braille'){
+  out.forEach((line,y)=>{
+   Array.from(line).forEach((ch,x)=>{
+    const span=document.createElement('span');
+    const [r,g,b]=RGB[y][x];
+    span.style.color='rgb('+r+','+g+','+b+')';
+    span.textContent=ch;
+    art.appendChild(span);
+   });
+   if(y<out.length-1)art.appendChild(document.createTextNode('\n'));
+  });
+ }else{
+  art.textContent=output;
+ }
+ const screen=$('artScreen');const fontSize=Math.max(3,Math.min(12,(screen.clientWidth-12)/(cols*.62),(screen.clientHeight-12)/(rows*1.05)));art.style.fontSize=fontSize+'px';art.style.lineHeight='1.05';if(ccOn)cc.textContent=output;
+ return output;
+}
+$('preview').onclick=()=>{let t=render();if(t)$('status').textContent='Előnézet frissítve.'};$('ccBtn').onclick=()=>{ccOn=!ccOn;cc.hidden=!ccOn;if(ccOn){cc.textContent=art.textContent;$('ccBtn').textContent='CC szimuláció kikapcsolása'}else $('ccBtn').textContent='CC szimuláció'};
+function seek(t){return new Promise(resolve=>{let done=()=>{v.removeEventListener('seeked',done);resolve()};v.addEventListener('seeked',done);v.currentTime=t;if(Math.abs(v.currentTime-t)<.001)setTimeout(done,40)})}
+$('generate').onclick=async()=>{if(!v.duration)return;let fps=Number($('fps').value),start=Math.max(0,Number($('start').value)||0),end=$('end').value===''?v.duration:Math.min(v.duration,Number($('end').value)),step=1/fps;if(end<=start){$('status').textContent='A végidőnek nagyobbnak kell lennie a kezdésnél.';return}let count=Math.ceil((end-start)*fps);if(count>3000&&!confirm(count+' képkocka készül. Folytatod?'))return;frames=[];srt='';$('download').disabled=true;$('downloadTxt').disabled=true;v.pause();$('generate').disabled=true;try{for(let frameIndex=0;frameIndex<count;frameIndex++){let t=start+frameIndex*step;await seek(Math.min(t,v.duration-.01));let text=render();frames.push({start:t,end:Math.min(end,t+step),text,srtText:currentSrtText});srt=frames.map((f,j)=>(j+1)+'\n'+stamp(f.start)+' --> '+stamp(f.end)+'\n'+(f.srtText||f.text)).join('\n\n')+'\n';$('download').disabled=false;$('downloadTxt').disabled=false;$('bar').style.width=Math.round((frameIndex+1)/count*100)+'%';$('frameCount').textContent=(frameIndex+1)+' képkocka';$('status').textContent='Feldolgozás: '+(frameIndex+1)+' / '+count; if(frameIndex%2===0)await new Promise(r=>setTimeout(r,0))}srt=frames.map((f,idx)=>(idx+1)+'\n'+stamp(f.start)+' --> '+stamp(f.end)+'\n'+(f.srtText||f.text)).join('\n\n')+'\n';$('download').disabled=false;$('downloadTxt').disabled=false;$('status').textContent='Kész! '+frames.length+' képkocka elkészült. Az SRT és TXT fájl is letölthető.'}catch(e){$('status').textContent='Hiba: '+e.message+(e.lineNumber?' (sor: '+e.lineNumber+')':'');console.error(e)}finally{$('generate').disabled=false}};
+$('download').onclick=()=>{if(!frames.length)return;srt=frames.map((f,idx)=>(idx+1)+'\n'+stamp(f.start)+' --> '+stamp(f.end)+'\n'+(f.srtText||f.text)).join('\n\n')+'\n';let a=document.createElement('a'),u=URL.createObjectURL(new Blob([srt],{type:'text/plain;charset=utf-8'}));a.href=u;a.download='feliratos-animation.srt';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+$('downloadTxt').onclick=()=>{if(!frames.length)return;let txt=frames.map((f,idx)=>'Képkocka '+(idx+1)+' | '+stamp(f.start)+' - '+stamp(f.end)+'\n'+f.text).join('\n\n');let a=document.createElement('a'),u=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));a.href=u;a.download='feliratos-animation.txt';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+})();
+</script></body></html>
